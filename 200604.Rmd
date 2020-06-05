@@ -1,0 +1,109 @@
+---
+title: 200604文献阅读
+author: 高文欣
+date: "`r Sys.Date()`"
+output: 
+    bookdown::gitbook:
+        split_by: none
+        split_bib: TRUE
+        df_print: paged
+bibliography: refs/add.bib
+---
+
+# 文献整理
+
+>信息抽取的定义为：从自然语言文本中抽取指定类型的实体、关系、事件等事实信息，并形成结构化数据输出的文本处理技术。信息抽取是从文本数据中抽取特定信息的一种技术。文本数据是由一些具体的单位构成的，例如句子、段落、篇章，文本信息正是由一些小的具体的单位构成的，例如字、词、词组、句子、段落或是这些具体的单位的组合。抽取文本数据中的名词短语、人名、地名等都是文本信息抽取，当然，文本信息抽取技术所抽取的信息可以是各种类型的信息。
+
+## Relation Classiﬁcation via Convolutional Deep Neural Network
+
+### 方法
+
+>In this paper, we exploit a convolutional deep neural network(DNN) to extract lexical and sentence level features. Our method takes all of the word tokens as input without complicated pre-processing. First, the word tokens are transformed to vectors by looking up word embeddings1. Then, lexical level features are extracted according to the given nouns. Meanwhile, sentence level features are learned using a convolutional approach. These two level features are concatenated to form the ﬁnal extracted feature vector. Finally, the features are fed into a softmax classiﬁer to predict the relationship between two marked nouns. [@CNN-RELEATION]
+
+利用卷积深度神经网络（DNN）来提取**词汇**和**句子级别**的特征。
+
+- 预训练好的wordembedding
+- senstence level提取特征
+
+连接这两个级别的特征以形成最终提取的特征向量。最后，将这些特征输入softmax分类器以预测两个标记名词之间的关系。具体如下
+
+- Word Representation
+
+使用预训练好的word embedding作为Word Representation。
+
+- Lexical Level Features
+
+使用通用词嵌入作为基本特征的来源。选择标记名词的嵌入和上下文标记。所有这些功能都连接到词汇级别特征向量。从五个词法层面对句子进行特征提取，来使得我们的模型更加的有偏重性。
+
+- Sentence Level Features
+
+词嵌入技术已经能很好的表达词语之间的相关性。但是不能很好的捕捉远距离的词汇之间的关系，不能让计算机对于一个很长的句子表达有正确的理解。因此我们在句子级别的特征提取中使用卷积神经网络，希望能够结合所有的局部特征、提取句子中远距离的语法信息，最后生成我们的句子级别的特征向量。
+
+本文将输入CNN的token进一步细分为Word Features (WF)和 Position Features
+(PF)，其中WF通过设置窗口来在原始单词组成的捕捉句子中某一词语局部的上下文信息，实验决定3是最优窗口大小。
+
+本文还引入了PF，这个是句子中的词语和目标词之间的左右相对距离：
+
+- CNN
+
+前面提取到的都是局部特征，通过CNN提取更加长更加全面的特征。这里的CNN只是简单的**两个隐层**的CNN，使用tanh作为非线性变换函数。
+
+- softmax分类
+
+将CNN输出的全局特征与sentence级别的局部词语表示结合作为输入：f=[l,g]，输出的是一个向量，指明每个分类的概率大小。
+
+
+### 参数
+
+![cnn-para](figs/cnn-para.png)
+
+
+
+### 结果
+
+评价指标:F1
+
+![cnn-re](figs/CNN-RE.png)
+
+### 总结
+
+- 使用词法和句子两大类特征，然后将两大类特征拼接到一起，最后接全连接层+softmax得到分类结果。
+
+- 嵌入层使用了预训练的词向量，而不是随机初始化，不过用的不是word2vec，而是(Turian 2010 Word representations: a simple and general method for semi-supervised learning)提供的词嵌入。
+
+- 加入了Position Feature，因为CNN更多强调的是局部信息，而Position Feature强调了实体信息。
+
+
+> We conduct experiments using the SemEval-2010 Task 8 dataset.[@CNN-RELEATION]
+
+使用SemEval 2010 Task 8 Dataset的数据集，考虑方向共19种关系
+
+数据&代码见:https://github.com/FrankWork/conv_relation
+
+或者这个：https://blog.csdn.net/herosunly/article/details/90145218
+
+
+## Attention-Based Bidirectional Long Short-Term Memory Networks for Relation Classiﬁcation
+
+### 方法
+>To tackle these problems,we propose Attention-Based Bidirectional Long Short-Term Memory Networks(Att-BLSTM) to capture the most important se-mantic information in a sentence. The experimental results on the SemEval-2010 relation classiﬁcation task show that our method outperforms most of the existing methods, with only word vectors。[@zhou-etal-2016-attention]
+
+引入了attention+BiLSTM的结构进行关系分类任务，数据基于SemEval-2010
+
+###  Position Indicators
+
+Position Indicators直接使用标签来表示两个entity的位置，例如在SemEval2010_task中:
+
+The <e1> child </e1> was carefully wrapped and bound into the <e2> cradle </e2> by means of a cord
+这个句子，就可以使用 <e1>、<\e1>、<e2>、<\e2>作为四个Indicators。在训练的时候，直接将这四个标签作为普通的word即可突出两个entity。这个方法也不是该论文首创的，在《Relation classification via recurrent neural network》，已经被提到，其效果如下图所示：
+
+![PI](figs/bilstm+att.png)
+
+### 实验结果
+
+![BI](figs/BI.png)
+
+代码：https://github.com/SeoSangwoo/Attention-Based-BiLSTM-relation-extraction
+
+
+## 参考文献
