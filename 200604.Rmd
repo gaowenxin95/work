@@ -105,5 +105,168 @@ The <e1> child </e1> was carefully wrapped and bound into the <e2> cradle </e2> 
 
 代码：https://github.com/SeoSangwoo/Attention-Based-BiLSTM-relation-extraction
 
+### 总结
+
+>we propose a new paradigm for the task of entity-relation extraction. We cast the task as a multi-turn question answering problem, i.e., the extraction of entities and relations is transformed to the task of identifying answer spans from the context. This multi-turn
+QA formalization comes with several key advantages: ﬁrstly, the question query encodes important information for the entity/relation class we want to identify; secondly, QA provides a natural way of jointly modeling entity and relation; and thirdly, it allows us to exploit the well developed machine reading comprehension (MRC) models.
+Experiments on the ACE and the CoNLL04 corpora demonstrate that the proposed paradigm signiﬁcantly outperforms previous best models. We are able to obtain the state-of-the-art results on all of the ACE04, ACE05 and CoNLL04 datasets, increasing the SOTA results on the three datasets to 49.4 (+1.0),60.2 (+0.6) and 68.9 (+1.1), respectively.
+
+
+实体和关系的抽取转化为从上下文中识别答案跨度的任务。这种多回合的QA形式化有几个关键的优点：首先，问题查询(query)为想要识别的实体/关系类编码重要信息；其次，QA提供了一种自然的实体和关系联合建模的方式；第三，它能够开发出发展良好的机器阅读理解（MRC）模型。
+
+在ACE和CoNLL04语料库上的实验表明，本文所提出的模型明显优于以前的最佳模型。我们能够获得所有ACE04、ACE05和CoNLL04数据集的最新结果，将这三个数据集的SOTA结果分别增加到49.4（+1.0）、60.2（+0.6）和68.9（+2.1）。
+
+
+以往的模型主要分为两大类：
+- 一类是流水线方法，先用标记模型识别实体，然后用关系抽取模型识别每个实体对之间的关系；pipline
+- 另一类是联合方法，通过不同的策略将实体模型和关系模型结合起来，例如约束或参数共享。
+
+
+## Joint entity recognition and relation extraction as a multi-head selection problem
+
+实体关系联合抽取模型
+
+>Speciﬁcally, we model the entity recognition task using a CRF (Conditional Random Fields) layer and the relation extraction task as a multi-head selection problem (i.e., potentially identify multiple relations for each entity).
+
+使用CRF(条件随机域)层将实体识别任务和关系提取任务建模为一个多头选择问题。，可能为每个实体标识多个关系)
+
+所谓多头，意思是任何特定的实体都可能涉及到与其他实体的**多种关系**
+
+### 实体识别模型
+
+模型的基本层如下图1所示:
+![joint](figs/joint.png)
+(i)embedding层，
+(ii)双向序列LSTM (BiLSTM)层，
+(iii) CRF层，
+(iv) sigmoid评分层。
+
+ - Embedding层
+ - 输入：句子的token（单词
+ - 输出：词向量
+BiLSTM层能够为每个通过RNN结构合并上下文的单词提取更复杂的表示。
+然后CRF和sigmoid层就能够生成这两个任务的输出。
+- 每个token的输出(例如,史密斯)是双重的:
+(i)一个实体识别标签(如I-PER,表示命名实体的类型)和
+(ii)一组元组组成的头标记实体和它们之间的关系的类型(例如,{(中心工作),(住在亚特兰大)})。
+
+- 由于假设了基于标记的编码，所以只将实体的最后一个标记作为另一个标记的头部，从而消除了冗余关系。例如，有一个关于实体约翰·史密斯和疾病控制中心之间工作关系。我们只连接Smith和Center，而不连接实体的所有令牌。同样，对于没有关系的情况，引入N标签，并预测令牌本身为头部。
+
+
+### 多头关系抽取模型
+
+- 将关系提取任务描述为一个多头选择问题(Zhang et al.， 2017;(Bekoulis et al.， 2018)。
+- 在一般公式中，每个令牌wi可以有多个头(即，与其他令牌的多个关系)。
+- 预测元组(yi, c_i)其中yi是正面的向量，而c_i是每个令牌wi对应关系的向量。这与之前的依赖分析方法的标准头选择不同(Zhang et al.， 2017)，因为
+ - (i)它被扩展为预测多个头，
+ - (ii)头的决策和关系是共同做出的(即，而不是先预测正面，然后在下一步使用额外的分类器来预测关系)。
+
+输入：给定一个令牌序列w和一组关系标签R作为输入，
+目标：我们的目标是识别每个令牌的wi, i{0，…， n}最可能正面的向量y i 和最可能对应关系标签r i的向量
+得分（给定一个标签rk，我们计算令牌wi和wj之间的分数如下:
+
+$$s^{(r)}\left(z_{j}, z_{i}, r_{k}\right)=V^{(r)} f\left(U^{(r)} z_{j}+W^{(r)} z_{i}+b^{(r)}\right) \quad \operatorname{Pr}\left(\text {head}=w_{j}, \text { label }=r_{k} | w_{i}\right)=\sigma\left(s^{(r)}\left(z_{j}, z_{i}, r_{k}\right)\right)$$
+交叉损失函数
+
+$$\mathcal{L}_{\mathrm{rel}}=\sum_{i=0}^{n} \sum_{j=0}^{m}-\log \operatorname{Pr}\left(\text {head}=y_{i, j}, \text {relation}=r_{i, j} | w_{i}\right)$$
+
+### 代码数据
+
+github传送门：https://github.com/bekou/multihead_joint_entity_relation_extraction
+
+## Adversarial training for multi-context joint entity and relation extraction
+
+抗多任务学习用于文本分类
+
+>Adversarial training (AT) is a regularizationmethod that can be used to improve the robustness of neural network methods by addingsmall perturbations in the training data. We show how to use AT for the tasks of entity recognition and relation extraction. In particular, we demonstrate that applying AT to a general purpose baseline model for jointly extracting entities and relations, allows improving the state-of-the-art effectiveness on several datasets in different contexts (i.e., news,biomedical, and real estate data) and for different languages (English and Dutch).[@bekoulis-etal-2018-adversarial]
+
+神经网络模型因为学习共享层用于捕获任务共有的和与任务相关的特征而在mutil-task任务中表现出很不错的性能。但是现有大多数方法在提取特征时，都因为共享特征中含有task-specific特征或者其他任务的噪声而受到影响。本文**将AT作为联合提取任务的训练过程的扩展**缓解了共享特征空间和特定任务特征空间相互干扰的问题，作者在16个任务上进行实验证明其模型的有效性，并且实验结果表明模型的共享特征学习到的知识可以很好地用在新任务上。
+
+### 相关工作
+
+>Joint entity and relation extraction: Joint models (Li and Ji, 2014; Miwa and Sasaki, 2014)that are based on manually extracted features have been proposed for performing both the named entity recognition (NER) and relation extraction subtasks at once. These methods rely on the availability of NLP tools (e.g., POS taggers) or manually designed features leading to additional complexity. Neural network methods have been exploited to overcome this feature design issue and usually involve RNNs and CNNs [@bekoulis-etal-2018-adversarial]
+
+联合实体和关系提取:
+
+- 联合模型(Li and Ji, 2014;Miwa和Sasaki(2014)提出了一种基于手动提取特征的方法，用于同时执行命名实体识别(NER)和关系提取子任务。
+
+  - 缺点：这些方法依赖于NLP工具的可用性(例如，POS标记器)或手动设计的特性，从而导致额外的复杂性。
+  
+- 神经网络方法已经被用来克服这一特征设计问题，通常涉及到RNNs和CNNs (Miwa和Bansal，2016; Zheng et al., 2017).)
+
+
+ 实体识别和关系抽取的目标是从非结构化的文本中发现实体mention的关系结构，它对知识库的构建使用和问答等任务都很重要，它是信息抽取的核心问题。
+
+现有的方法整体来说有两种：**把实体识别和关系抽取看作两个分开的任务的pipline模型、联合模型**，它们都存在着缺陷。
+
+现有模型的不足：
+
+**pipline模型**：错误会在不同组件之间传播，造成错误的累积；关系抽取只是利用了NER任务的结果，造成一个任务中可能对其他任务有用的信息没有被用到。
+
+**联合模型**：有的需要人工特征，虽然利用神经网络已经可以不人工选特征了，但是会依赖于很多NLP工具，如pos标注、依存分析；单个实体的多个关系抽取还存在问题。
+
+
+
+本文要介绍的联合模型能一块执行实体识别和关系抽取两个任务，同时能够解决多关系问题，并且不依赖其他的NLP工具，不需要人工设置的特征。
+
+### 创新点
+
+- 将原来的single head selection拓展为预测多个头；
+
+- 对于头和关系的决策是一块完成的，而不是先预测头，然后在下一步用关系分类器预测关系；
+
+- 对抗训练；
+  
+
+**baseline模型**
+
+>We use character level embeddings to implicitly capture morphological features (e.g.,preﬁxes and sufﬁxes), representing each character by a vector (embedding). The character embedings are fed to a bidirectional LSTM (BiLSTM)to obtain the character-based representation of the word. We also use pre-trained word embeddings.
+Word and character embeddings are concatenated to form the ﬁnal token representation, which is then fed to a BiLSTM layer to extract sequential information.For the NER task, **we adopt the BIO (Beginning, Inside, Outside) encoding scheme.** [@bekoulis-etal-2018-adversarial]
+
+- embedding layer；
+- Bilstm layer
+- a CRF layer and (iv) a relation extraction layer. In AT, we compute the worst-case perturbations η of the input embeddings.
+
+- 在词级别的向量上加入了字符级的信息，这样的embedding可以捕捉如前缀后缀这样的形态特征，这样的形态学特征在英语、德语这类语言的实体识别任务中效果有显著的提升。先用skip-gram word2vec模型预训练得到的词向量表把每个词映射为一个词向量，然后把每个词中字母用一个向量表示，把一个词中所包含的字母的向量送入BiLSTM中，把前向和后向两个最终状态和词向量进行拼接，得到词的embedding。
+
+- 经典的BiLSTM模型，把句子中所包含的词的embedding输入其中，然后将前向和后向每个对应位置的hidden state拼接起来得到新的编码序列
+
+- 采用BIO标注策略，使用CRF引入标签之间的依赖关系。
+
+这个就是baseline模型，也就是上一篇文章(3,4这两篇文章是一个实验室发的，4在3的基础上增加了AT)
+
+![AT](figs/AT.png)
+
+### AT
+
+>we generate examples which are variations of the original ones by adding some noise at the level of the concatenated word representation (Miyato et al., 2017). This is similar to the concept introduced by Goodfellow et al. (2015) to improve the robustness of image recognition classiﬁers. We generate an adversarial example by adding the worst-case perturbation ηadv to the original embedding w that maximizes the loss function:[@bekoulis-etal-2018-adversarial]
+
+AT被认为是一种规则的方法，但它不像worddroup那样引入随机的噪声，AT生成的扰动是容易被模型错误分类的例子的变形。
+
+>抗训练的思路，就是在输入上进行梯度上升(增大loss)，在参数上进行梯度下降(减小loss)。由于输入会进行embedding lookup，所以实际的做法是在embedding table上进行梯度上升。[知乎专栏](https://zhuanlan.zhihu.com/p/103593948)
+
+通过在原来的embedding上加入最坏的扰动使得损失函数最大，来得到对抗样例，直接想到的公式如下:
+
+$$\eta_{a d v}=\underset{\|\eta\| \leq \epsilon}{\operatorname{argmax}} \mathcal{L}_{\mathrm{JOINT}}(w+\eta ; \hat{\theta})$$
+
+这个公式在神经网络中难以处理，因此采用近似方法
+
+$$\begin{array}{l}
+n_{a d v}=\epsilon g /\|g\| \\
+g=\nabla_{w} \iota_{J O I N T}(w ; \hat{\theta})
+\end{array}$$
+
+
+### 实验结果
+
+![ATRE](figs/ATRE.png)
+
+### 代码数据
+
+github传送门：https://github.com/bekou/multihead_joint_entity_relation_extraction
+
 
 ## 参考文献
+
+
+

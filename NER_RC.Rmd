@@ -1,0 +1,25 @@
+---
+title: 实体识别和关系抽取笔记
+author: 高文欣
+date: "`r Sys.Date()`"
+output: 
+    bookdown::gitbook:
+        split_by: none
+        split_bib: TRUE
+        df_print: paged
+bibliography: refs/add.bib
+---
+
+# 知识图谱学习笔记
+
+## NER
+
+Name Entity Recognition,实体识别
+
+## RE
+
+Relation Extraction,关系抽取
+
+## 对抗训练
+
+[知乎专栏](https://zhuanlan.zhihu.com/p/103593948)
