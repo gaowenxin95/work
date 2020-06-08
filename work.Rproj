@@ -11,6 +11,3 @@ Encoding: UTF-8
 
 RnwWeave: knitr
 LaTeX: XeLaTeX
-
-BuildType: Makefile
-MakefilePath: D:/makefile/GnuWin32/bin
