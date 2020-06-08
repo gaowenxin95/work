@@ -24,7 +24,7 @@
 <meta name="author" content="高文欣" />
 
 
-<meta name="date" content="2020-06-07" />
+<meta name="date" content="2020-06-08" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -92,6 +92,10 @@
 <li class="chapter" data-level="1.4.4" data-path=""><a href="#实验结果-1"><i class="fa fa-check"></i><b>1.4.4</b> 实验结果</a></li>
 <li class="chapter" data-level="1.4.5" data-path=""><a href="#代码数据-1"><i class="fa fa-check"></i><b>1.4.5</b> 代码数据</a></li>
 </ul></li>
+<li class="chapter" data-level="1.5" data-path=""><a href="#entity-relation-extraction-as-multi-turn-question-answering"><i class="fa fa-check"></i><b>1.5</b> Entity-Relation Extraction as Multi-turn Question Answering</a><ul>
+<li class="chapter" data-level="1.5.1" data-path=""><a href="#头实体抽取阶段和关系和尾部抽取阶段"><i class="fa fa-check"></i><b>1.5.1</b> 头实体抽取阶段和关系和尾部抽取阶段</a></li>
+</ul></li>
+<li class="chapter" data-level="1.6" data-path=""><a href="#基于dgcnn和概率图的轻量级信息抽取模型"><i class="fa fa-check"></i><b>1.6</b> 基于DGCNN和概率图的轻量级信息抽取模型</a></li>
 <li class="chapter" data-level="" data-path=""><a href="#参考文献"><i class="fa fa-check"></i>参考文献</a></li>
 </ul></li>
 </ul>
@@ -114,7 +118,7 @@
 <div id="header">
 <h1 class="title">200604文献阅读</h1>
 <p class="author"><em>高文欣</em></p>
-<p class="date"><em>2020-06-07</em></p>
+<p class="date"><em>2020-06-08</em></p>
 </div>
 <div id="文献整理" class="section level1">
 <h1><span class="header-section-number">1</span> 文献整理</h1>
@@ -360,11 +364,72 @@ g=\nabla_{w} \iota_{J O I N T}(w ; \hat{\theta})
 <p>github传送门：<a href="https://github.com/bekou/multihead_joint_entity_relation_extraction" class="uri">https://github.com/bekou/multihead_joint_entity_relation_extraction</a></p>
 </div>
 </div>
+<div id="entity-relation-extraction-as-multi-turn-question-answering" class="section level2">
+<h2><span class="header-section-number">1.5</span> Entity-Relation Extraction as Multi-turn Question Answering</h2>
+<p>这个篇文章的创新点在于其<strong>将实体关系联合抽取的任务当作一个多轮问答类问题来处理</strong>，即每种实体和每种关系都用一个问答模板进行刻画，从而这些实体和关系可以通过回答这些模板化的问题来从上下文中进行抽取。</p>
+<blockquote>
+<p>We cast the task as a multi-turn question answering problem, i.e., the extraction of entities and relations is transformed to the task of identifying answer spans from the context. <span class="citation">(Li et al. 2019)</span></p>
+</blockquote>
+<ul>
+<li>将关系抽取任务顶一个<strong>多轮问答</strong>任务：每个实体类型和关系类型由问答模板表征，实体和关系通过回答模板问题提取。答案是文本跨度（textspans），使用现在标准的机器阅读理解（MRC）框架提取：预测给定上下文时的答案跨度。</li>
+</ul>
+<blockquote>
+<p>ﬁrstly, the question query encodes important information for the entity/relation class we want to identify;
+secondly, QA provides a natural way of jointly modeling entity and relation;
+and thirdly, it allows us to exploit the well developed machine reading comprehension (MRC) models.<span class="citation">(Li et al. 2019)</span></p>
+</blockquote>
+<p>这种多转QA形式化具有几个关键优势：</p>
+<ul>
+<li>首先，问题查询为我们想要识别的实体/关系类编码重要信息;</li>
+<li>其次，质量保证提供了一种自然的实体和关系建模方式;</li>
+<li>第三，它允许我们利用完善的机器阅读理解（MRC）模型。</li>
+</ul>
+<div id="头实体抽取阶段和关系和尾部抽取阶段" class="section level3">
+<h3><span class="header-section-number">1.5.1</span> 头实体抽取阶段和关系和尾部抽取阶段</h3>
+<p>首先确定目标实体 e1
+之后根据目标实体和候选关系类别进行提问
+这样的处理方法主要有如下几个优点：</p>
+<ul>
+<li><p>能够很好地捕捉标签的层次依赖性。即随着每一轮问答的进行，我们有序的获得所需要的实体，这与多回合填充式对话系统类似问题的编码能够整合对关系分类任务重要的一些先验信息，这些信息可以潜在地解决了现有关系抽取模型难以解决的问题，如远距离实体对，或是关系重叠问题。</p></li>
+<li><p>QA任务提供了一种很自然的方式来融合实体抽取和关系抽取任务，因为 QA 任务对于没有答案的问题可以返回 None，则对于不存在相应关系的问题，如果返回的不是 None，则可以同时确定实体和关系</p></li>
+</ul>
+<div class="figure">
+<img src="figs/weicode.png" alt="" />
+<p class="caption">伪代码</p>
+</div>
+<p>将实体关系抽取任务转化为多轮问答任务的算法如上所示，整个算法分如下几个部分：</p>
+<ul>
+<li><p><strong>头实体抽取(line 4 - 9)</strong>：由于每一轮多轮对话都需要一个头实体来作为trigger，因此需要事先抽取句子中所有的头实体，而抽取实体的过程可以看作一个抽取 entity_question 答案的过程。所有 entity_question 都存放在 EntityQuesTemplates 中，每一种 entity_question 都对应一类实体的抽取。</p></li>
+<li><p><strong>关系与尾实体抽取(line 10 - 24)</strong>：ChainOfRelTemplates
+定义了一个关系序列，我们需要根据这个关系序列来进行多轮问答。同时，它也定义了每种关系的模板，为了生成对应的问题（第14行），我们要在模板槽（slot）中插入之前抽取的实体。然后，关系 REL 和尾实体 e 就能通过回答问题同时被抽取出来。如果回答是 None，就说明没有答案，即只有同时抽出头实体，以及头实体存在对应的关系和尾实体被抽出时，才算是成功抽出一个满足条件的三元组了。</p></li>
+</ul>
+<p>我们知道现阶段常见的 MRC 模型都是通过指针网络的方式，仅预测答案在 Context 中的开始和结束位置，仅适用于单答案的情况。但对于实体识别任务，在一段 Context 中可能有多个答案，所以这种方法并不合适。作者的做法是将其当作以问题为基础的序列标注问题，或者说将 2 个 N-class 分类任务转换成 N 个 5-class 分类任务，其中 N 为句子长度。</p>
+<p>作者将 BERT 作为 baseline。训练时，损失函数为两个子任务的叠加，即：</p>
+<p><span class="math display">\[L=(1-\lambda) L\left(\text {head}_{e} \text {ntity}\right)+\lambda L\left(\text {tail}_{e} \text {ntity}, \text {rel}\right)\]</span>
+为了进一步优化模型性能，还采用了强化学习的方法来进一步优化，</p>
+<p>数据集</p>
+<p>ACE04, ACE05 and CoNLL04</p>
+<p>这部分的数据和代码没有找到</p>
+</div>
+</div>
+<div id="基于dgcnn和概率图的轻量级信息抽取模型" class="section level2">
+<h2><span class="header-section-number">1.6</span> 基于DGCNN和概率图的轻量级信息抽取模型</h2>
+<p>这个是苏神的一个比赛模型<span class="citation">(Su 2019)</span></p>
+<p><a href="https://kexue.fm/archives/6671">科学空间</a></p>
+<p>百度的比赛数据集：<a href="http://ai.baidu.com/broad/introduction" class="uri">http://ai.baidu.com/broad/introduction</a></p>
+<p>这个是苏神开源的代码：<a href="https://github.com/bojone/kg-2019" class="uri">https://github.com/bojone/kg-2019</a></p>
+</div>
 <div id="参考文献" class="section level2 unnumbered">
 <h2>参考文献</h2>
 <div id="refs" class="references">
 <div id="ref-bekoulis-etal-2018-adversarial">
 <p>Bekoulis, Giannis, Johannes Deleu, Thomas Demeester, and Chris Develder. 2018. “Adversarial Training for Multi-Context Joint Entity and Relation Extraction.” In <em>Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing</em>, 2830–6. Brussels, Belgium: Association for Computational Linguistics. <a href="https://doi.org/10.18653/v1/D18-1307">https://doi.org/10.18653/v1/D18-1307</a>.</p>
+</div>
+<div id="ref-QA">
+<p>Li, Xiaoya, Fan Yin, Zijun Sun, Xiayu Li, Arianna Yuan, Duo Chai, Mingxin Zhou, and Jiwei Li. 2019. “Entity-Relation Extraction as Multi-Turn Question Answering,” May.</p>
+</div>
+<div id="ref-jianlin2019bdkgf">
+<p>Su, Jianlin. 2019. “A Hierarchical Relation Extraction Model with Pointer-Tagging Hybrid Structure.” https://github.com/bojone/kg-2019; GitHub.</p>
 </div>
 <div id="ref-CNN-RELEATION">
 <p>Zeng, Daojian. 2014. “Relation Classiﬁcation via Convolutional Deep Neural Network.” paper. 2014.</p>

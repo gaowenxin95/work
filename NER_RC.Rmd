@@ -10,11 +10,71 @@ output:
 bibliography: refs/add.bib
 ---
 
-# 知识图谱学习笔记
+# 实体识别和关系抽取笔记
+
+从一个文本里面识别出实体和实体之间对应的关系
+
+常用的实体识别和关系抽取的基础模型主要有两种
+
+1.使用**流水线(pipline)方法**进行抽取：先对句子进行实体识别，然后对识别出的实体两两组合，再进行关系分类，最后把存在实体关系的三元组做为输入。
+
+缺点：1.错误传播，实体识别模块的错误会影响下面的关系分类性能。2.差生了没必要的冗余信息，没有关系的实体会带来多余信息，提升错误率。错误会在不同组件之间传播，造成错误的累积；关系抽取只是利用了NER任务的结果，造成一个任务中可能对其他任务有用的信息没有被用到。
+
+2.实体识别和关系抽取的**联合模型**：对句子同时做实体识别和关系抽取得到一个有关系的实体三元组。[NeilGY](https://blog.csdn.net/NeilGY/article/details/87966676)
+
+**联合模型**：有的需要人工特征，虽然利用神经网络已经可以不人工选特征了，但是会依赖于很多NLP工具，如pos标注、依存分析；单个实体的多个关系抽取还存在问题。
+
+目前感觉用到的多的是**联合模型**
+
+- pos标注
+- 依存分析
+
+举个例子给出一段文本
+
+```r
+In 2002, Musk founded SpaceX, an aerospace manufacturer and space transport services Company, of which he is CEO and lead designer. He helped fund Tesla, Inc., an electric vehicle and solar panel manufacturer, in 2003, and became its CEO and product architect. In 2006, he inspired the creation of SolarCity, a solar energy services Company, and operates as its chairman. In 2016, he co-founded Neuralink, a neurotechnology Company focused on developing brain–computer interfaces, and is its CEO. In 2016, Musk founded The Boring Company, an infrastructure and tunnel construction Company.
+```
+
+We need to extract four different types of entities, i.e., Person, Company, Time and Position,and three types of relations, FOUND, FOUNDING TIME and SERVING-ROLE. The text is to be transformed into a structural dataset shown in Table 1.
+
+![QA](figs/QA.png)
+>Most existing models approach this task by extracting a list of triples from the text, i.e.,
+REL(e1, e2), which denotes that relation REL holds between entity e1 and entity e2. Previous models
+fall into two major categories: the pipelined approach, which ﬁrst uses tagging models to identify
+entities, and then uses relation extraction models to identify the relation between each entity pair;
+and the joint approach, which combines the entity model and the relation model throught different
+strategies, such as constraints or parameters sharing.
+
+
+- 大多数现有的模型通过从文本中提取三元组列表来完成此任务，即REL(e1;e2)表示实体e1与实体e2之间的关系REL。以前的模型主要分为两大类:流水线方法，它首先使用标记模型来识别实体，然后使用关系提取模型来识别每个实体对之间的关系.
+
+- 联合方法通过约束或参数共享等不同策略，将实体模型与关系模型相结合。
+
+>There are several key issues with current approaches, both in terms of the task formalization
+and the algorithm. At the formalization level, the REL(e1, e2) triplet structure is not enough to fully
+express the data structure behind the text. Take the Musk case as an example, there is a hierarchical dependency between the tags: the extraction of Time depends on Position since a Person can hold multiple Positions in a Company during different Time periods. The extraction of Position also depends on Company since a Person can work for multiple companies. At the algorithm level, for most existing relation extraction models (Miwa and Bansal, 2016; Wang et al., 2016a;Ye et al., 2016), the input to the model is a raw sentence with two marked mentions, and the output is whether a relation holds between the two mentions. As pointed out in Wang et al. (2016a);Zeng et al. (2018), it is hard for neural models to capture all the lexical, semantic and syntactic cues in this formalization, especially when (1) entities are far away; (2) one entity is involved in multiple triplets; or (3) relation spans have overlaps.
+
+当前的方法在任务形式化和算法方面存在几个关键问题。
+- 在形式化层次上，REL(e1;e2)三元组结构不足以充分表达文本背后的数据结构。
+- 以Musk为例，标签之间存在层次依赖关系:时间的提取依赖于位置，因为一个人可以在不同的时间段内担任公司的多个位置。职位的选择也取决于公司，因为一个人可以在多家公司工作。在算法层面，对于大多数现有的关系提取模型(Miwa和Bansal, 2016;王等，2016a;(Ye et al.， 2016)，模型的输入是两个标记提及的原始语句，输出是两个提及之间是否存在关系。Wang et al. (2016a)指出;Zeng et al.(2018)，在这种形式化过程中，神经模型很难捕捉到所有的词汇、语义和句法线索，特别是当
+
+- (1)实体距离较远的时候;
+- (2)一个实体涉及多个三元组;
+- (3)关系跨有重叠。
+
+许多早期的实体-关系提取系统都是流水线的(Zelenko et al.， 2003;Miwa等人，2009;陈和罗斯，2011年;Lin et al.， 2016):实体提取模型首先识别感兴趣的实体，然后关系提取模型构建被提取实体之间的关系。尽管流水线系统可以灵活地集成不同的数据源和学习算法，但是它们会受到错误传播的严重影响。
+
+为了解决这一问题，提出了联合学习模型。早期的联合学习方法通过各种依赖关系将两个模型连接起来，包括用整数线性规划求解的约束(Yang and Cardie, 2013;Roth和Yih, 2007)，卡片金字塔解析(Kate和Mooney, 2010)，和全球概率图形模型(Yu和Lam,2010;辛格等人，2013)。在后来的研究中，Li和Ji(2014)使用结构化感知器和有效的集束搜索来提取实体提及和关系，这比基于约束的方法更有效，更省时。Miwa和Sasaki (2014);Gupta等人(2016);Zhang等人(2017)提出了表格填充方法，该方法提供了将更复杂的特征和算法纳入模型的机会，如解码中的搜索顺序和全局特征。神经网络模型在文献中也得到了广泛的应用。Miwa和Bansal(2016)提出了一种端到端方法，使用具有共享参数的神经网络模型提取实体及其关系，即，使用神经标记模型提取实体，使用基于树LSTMs的神经多类分类模型提取关系(Tai et al.， 2015)。Wang等人(2016a)利用多级注意力CNNs提取关系。Zeng等人(2018)提出了一种新的框架，利用序列到序列模型生成实体关系三元组，将实体检测与关系检测自然地结合起来。
+
+另一种将实体和关系提取模型进行绑定的方法是采用强化学习或最小风险训练，其中训练信号是基于两个模型的联合决策给出的。Sun等(2018)优化了全局损失函数，在最小风险训练框架下联合训练两个模型。Takanobu等(2018)采用分层强化学习的方法，以分层的方式提取实体和关系。
+
 
 ## NER
 
 Name Entity Recognition,实体识别
+
+
+
 
 ## RE
 
@@ -22,4 +82,4 @@ Relation Extraction,关系抽取
 
 ## 对抗训练
 
-[知乎专栏](https://zhuanlan.zhihu.com/p/103593948)
+>抗训练的思路，就是在输入上进行梯度上升(增大loss)，在参数上进行梯度下降(减小loss)。由于输入会进行embedding lookup，所以实际的做法是在embedding table上进行梯度上升。[知乎专栏](https://zhuanlan.zhihu.com/p/103593948)
