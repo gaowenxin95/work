@@ -24,7 +24,7 @@
 <meta name="author" content="高文欣" />
 
 
-<meta name="date" content="2020-06-08" />
+<meta name="date" content="2020-06-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -96,6 +96,7 @@
 <li class="chapter" data-level="1.5.1" data-path=""><a href="#头实体抽取阶段和关系和尾部抽取阶段"><i class="fa fa-check"></i><b>1.5.1</b> 头实体抽取阶段和关系和尾部抽取阶段</a></li>
 </ul></li>
 <li class="chapter" data-level="1.6" data-path=""><a href="#基于dgcnn和概率图的轻量级信息抽取模型"><i class="fa fa-check"></i><b>1.6</b> 基于DGCNN和概率图的轻量级信息抽取模型</a></li>
+<li class="chapter" data-level="1.7" data-path=""><a href="#joint-extraction-of-entities-and-relations-based-on-a-novel-decomposition-strategy"><i class="fa fa-check"></i><b>1.7</b> Joint Extraction of Entities and Relations Based on a Novel Decomposition Strategy</a></li>
 <li class="chapter" data-level="" data-path=""><a href="#参考文献"><i class="fa fa-check"></i>参考文献</a></li>
 </ul></li>
 </ul>
@@ -118,7 +119,7 @@
 <div id="header">
 <h1 class="title">200604文献阅读</h1>
 <p class="author"><em>高文欣</em></p>
-<p class="date"><em>2020-06-08</em></p>
+<p class="date"><em>2020-06-12</em></p>
 </div>
 <div id="文献整理" class="section level1">
 <h1><span class="header-section-number">1</span> 文献整理</h1>
@@ -418,6 +419,28 @@ and thirdly, it allows us to exploit the well developed machine reading comprehe
 <p><a href="https://kexue.fm/archives/6671">科学空间</a></p>
 <p>百度的比赛数据集：<a href="http://ai.baidu.com/broad/introduction" class="uri">http://ai.baidu.com/broad/introduction</a></p>
 <p>这个是苏神开源的代码：<a href="https://github.com/bojone/kg-2019" class="uri">https://github.com/bojone/kg-2019</a></p>
+</div>
+<div id="joint-extraction-of-entities-and-relations-based-on-a-novel-decomposition-strategy" class="section level2">
+<h2><span class="header-section-number">1.7</span> Joint Extraction of Entities and Relations Based on a Novel Decomposition Strategy</h2>
+<blockquote>
+<p>Starting with a sentence, we ﬁrst judiciously distinguish all the candidate head-entities that may be involved with target relations, then label corresponding tail-entities and relations for each extracted head-entity. We call the former subtask as <strong>Head-Entity (HE) extraction</strong>, and the later as <strong>Tail-Entity and Relation (TER) extraction</strong>. Such extract-then-label (ETL) paradigm can be understood by decomposing the joint probability of triplet extraction into conditional probability p(h, r, t|S) =p(h|S)p(r, t|h, S), where (h, r, t) is a triplet in sentence S. In this manner, our TER extractor is able to take the semantic and position information of the given head-entity into account when tagging tail-entities and relations, and naturally, one head-entity can interact with multiple tail-entities to form overlapping relations. Besides,compared with the extract-then-classify methods, our paradigm no longer extracts all entities at the ﬁrst step, only head-entities that are likely to participate in target triplets are identiﬁed, thus alleviating the impact of redundant entity pairs.</p>
+</blockquote>
+<ul>
+<li>先识别主体:头实体提取，然后把每一个主体作为触发词</li>
+<li>然后根据主体预测对应该主体的客体和关系</li>
+</ul>
+<div class="figure">
+<img src="figs/span.png" alt="" />
+<p class="caption">span</p>
+</div>
+<p><a href="https://blog.csdn.net/eagleuniversityeye/article/details/106461100">论文解读我觉得挺好的</a></p>
+<p>由于抽取 主体以及抽取主体所对应的客体及关系的过程均是非唯一性的（存在实体及关系重叠问题），因此，作者采用了 MRC 中常用的指针网络的抽取方法，即仅抽取答案的开始和结束位置，且把预测开始和结束位置的任务转化为了预测每一个位置是否为开始位置或结束位置（将softmx换成sigmoid）。模型的整体结构如下图所示：</p>
+<div class="figure">
+<img src="figs/span2.png" alt="" />
+<p class="caption">span2</p>
+</div>
+<p>整个模型可以分为三大部分，第一部分Shared Encoder，是模型的编码层，将输入的每个字编码为字向量。第二部分HE Extractor使用Shared Encoder的结果抽取（s，o，p）三元组中的主体s，第三部分TER Extractor也使用Shared Encoder的结果作为输入，同时还要使用HE Extractor抽取出的s作为触发词，抽取o和p。模型的loss是HE Extractor和TER Extractor两部分的loss之和，通过共享参数的方式训练。</p>
+<p>HE Extractor和TER Extractor都使用了HBT结构来抽取结果（这里的HBT结构和下文中提到的HBT模型之间没有关系），这个HBT结构由两个双向LSTM组成，分别用来预测目标实体的开始位置和结束位置，预测结束位置的LSTM会使用预测开始位置的LSTM的结果作为特征，通过增加约束来避免不合理的预测结果，比如预测的结束位置在开始位置前面。</p>
 </div>
 <div id="参考文献" class="section level2 unnumbered">
 <h2>参考文献</h2>

@@ -333,6 +333,27 @@ $$L=(1-\lambda) L\left(\text {head}_{e} \text {ntity}\right)+\lambda L\left(\tex
 
 这个是苏神开源的代码：https://github.com/bojone/kg-2019
 
+## Joint Extraction of Entities and Relations Based on a Novel Decomposition Strategy
+
+>Starting with a sentence, we ﬁrst judiciously distinguish all the candidate head-entities that may be involved with target relations, then label corresponding tail-entities and relations for each extracted head-entity. We call the former subtask as **Head-Entity (HE) extraction**, and the later as **Tail-Entity and Relation (TER) extraction**. Such extract-then-label (ETL) paradigm can be understood by decomposing the joint probability of triplet extraction into conditional probability p(h, r, t|S) =p(h|S)p(r, t|h, S), where (h, r, t) is a triplet in sentence S. In this manner, our TER extractor is able to take the semantic and position information of the given head-entity into account when tagging tail-entities and relations, and naturally, one head-entity can interact with multiple tail-entities to form overlapping relations. Besides,compared with the extract-then-classify methods, our paradigm no longer extracts all entities at the ﬁrst step, only head-entities that are likely to participate in target triplets are identiﬁed, thus alleviating the impact of redundant entity pairs.
+
+- 先识别主体:头实体提取，然后把每一个主体作为触发词
+- 然后根据主体预测对应该主体的客体和关系
+
+![span](figs/span.png)
+
+[论文解读我觉得挺好的](https://blog.csdn.net/eagleuniversityeye/article/details/106461100)
+
+由于抽取 主体以及抽取主体所对应的客体及关系的过程均是非唯一性的（存在实体及关系重叠问题），因此，作者采用了 MRC 中常用的指针网络的抽取方法，即仅抽取答案的开始和结束位置，且把预测开始和结束位置的任务转化为了预测每一个位置是否为开始位置或结束位置（将softmx换成sigmoid）。模型的整体结构如下图所示：
+
+
+![span2](figs/span2.png)
+
+整个模型可以分为三大部分，第一部分Shared Encoder，是模型的编码层，将输入的每个字编码为字向量。第二部分HE Extractor使用Shared Encoder的结果抽取（s，o，p）三元组中的主体s，第三部分TER Extractor也使用Shared Encoder的结果作为输入，同时还要使用HE Extractor抽取出的s作为触发词，抽取o和p。模型的loss是HE Extractor和TER Extractor两部分的loss之和，通过共享参数的方式训练。
+
+HE Extractor和TER Extractor都使用了HBT结构来抽取结果（这里的HBT结构和下文中提到的HBT模型之间没有关系），这个HBT结构由两个双向LSTM组成，分别用来预测目标实体的开始位置和结束位置，预测结束位置的LSTM会使用预测开始位置的LSTM的结果作为特征，通过增加约束来避免不合理的预测结果，比如预测的结束位置在开始位置前面。
+
+
 
 
 ## 参考文献
