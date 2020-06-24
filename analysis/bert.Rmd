@@ -1,0 +1,5 @@
+BERT是双向的Transformer block连接
+
+因此学习bert之前还是要学好Transformer
+
+因此从Transformer讲起

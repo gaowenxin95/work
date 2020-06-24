@@ -241,7 +241,7 @@ Word and character embeddings are concatenated to form the ﬁnal token represen
 
 >we generate examples which are variations of the original ones by adding some noise at the level of the concatenated word representation (Miyato et al., 2017). This is similar to the concept introduced by Goodfellow et al. (2015) to improve the robustness of image recognition classiﬁers. We generate an adversarial example by adding the worst-case perturbation ηadv to the original embedding w that maximizes the loss function:[@bekoulis-etal-2018-adversarial]
 
-AT被认为是一种规则的方法，但它不像worddroup那样引入随机的噪声，AT生成的扰动是容易被模型错误分类的例子的变形。
+AT被认为是一种规则的方法，但它不像worddrop那样引入随机的噪声，AT生成的扰动是容易被模型错误分类的例子的变形。
 
 >抗训练的思路，就是在输入上进行梯度上升(增大loss)，在参数上进行梯度下降(减小loss)。由于输入会进行embedding lookup，所以实际的做法是在embedding table上进行梯度上升。[知乎专栏](https://zhuanlan.zhihu.com/p/103593948)
 

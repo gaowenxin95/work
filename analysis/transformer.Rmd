@@ -1,0 +1,8 @@
+了解transformer之前首先得了解word2vec这里我默认已经了解了
+
+transformer包含了自注意力机制和多头注意力机制。
+沿用了之前的encoder和decoder的思想~
+
+## attention注意力机制放在哪里
+
+
