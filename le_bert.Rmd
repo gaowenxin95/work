@@ -66,6 +66,9 @@ hard target就是true target，仅仅只包含一个类label
 $q_{i}=\frac{\exp \left(z_{i} / T\right)}{\Sigma_{j} \exp \left(z_{j} / T\right)}$
 
 
+其实可以理解为给label做label space增强，扩大label的可能性。
+
+
 
 ## DistilBERT
 
@@ -243,7 +246,121 @@ why?查一下相关issue
 https://www.jianshu.com/p/0b9970c4400a
 
 
-查一下华为的Tinybert
+## Tinybert
+
+效果
+
+>TinyBERT is empirically effective and achieves more than 96% the performance
+of teacher BERT BASE on GLUE benchmark, while being 7.5x smaller and 9.4x
+faster on inference. TinyBERT is also signiﬁcantly better than state-of-the-art
+baselines on BERT distillation, with only ∼28% parameters and ∼31% inference
+time of them.
+
+能达到原有bert的96%,速度提提升7.5~9.4倍
+
+### transformer 蒸馏法
+
+几乎是对每一层都进行了蒸馏~
+
+```{r}
+knitr::include_graphics('figs/tinybert.png')
+```
+
+- Transformer 层蒸馏
+
+>Problem Formulation. Assuming that the student model has $M$ Transformer layers and teacher model has $N$ Transformer layers, we choose $M$ layers from the teacher model for the Transformerlayer distillation. The function $n=g(m)$ is used as a mapping function from student layers to teacher layers, which means that the $m$ -th layer of student model learns the information from the $n$ th layer of teacher model. The embedding-layer distillation and the prediction-layer distillation are
+also considered. We set 0 to be the index of embedding layer and $M+1$ to be the index of prediction layer, and the corresponding layer mappings are defined as $0=g(0)$ and $N+1=g(M+1)$ respectively. The effect of the choice of different mapping functions on the performances will be studied in the experiment section. Formally, the student can acquire knowledge from the teacher by minimizing the following objective:
+
+假定 student 模型有 M 个 Transformer 层，teacher 模型有 N 个 Transformer 层，从 teacher 模型中选择 M 个 Transformer 层用于 Transformer 层蒸馏。n=g(m) 是 student 层到 teacher 层的映射函数，这意味着 student 模型的第 m 层从 teacher 模型的第 n 层开始学习信息。嵌入层蒸馏和预测层蒸馏也考虑进来，将嵌入层的指数设为 0，预测层的指数设为 M+1，并且对应的层映射分别定义为 0 = g(0) 和 N + 1 = g(M + 1)。
+
+
+$\mathcal{L}_{\mathrm{model}}=\sum_{m=0}^{M+1} \lambda_{m} \mathcal{L}_{\mathrm{layer}}\left(S_{m}, T_{g(m)}\right)$
+
+其中 L_layer 是给定模型层（如 Transformer 层或嵌入层）的损失函数，λ_m 是表征第 m 层蒸馏重要度的超参数。
+
+- 基于注意力层的蒸馏
+
+$\mathcal{L}_{\mathrm{atn}}=\frac{1}{h} \sum_{i=1}^{h} \operatorname{MSE}\left(\boldsymbol{A}_{i}^{S}, \boldsymbol{A}_{i}^{T}\right)$
+
+
+- 对Transformer隐藏层进行蒸馏
+
+$\mathcal{L}_{\mathrm{hidn}}=\operatorname{MSE}\left(\boldsymbol{H}^{S} \boldsymbol{W}_{h}, \boldsymbol{H}^{T}\right)$
+
+>where the matrices $\boldsymbol{H}^{S} \in \mathbb{R}^{l \times d^{\prime}}$ and $\boldsymbol{H}^{T} \in \mathbb{R}^{l \times d}$ refer to the hidden states of student and teacher networks respectively, which are calculated by Equation 4 The scalar values $d$ and $d^{\prime}$ denote the hidden sizes of teacher and student models, and $d^{\prime}$ is often smaller than $d$ to obtain a smaller student network. The matrix $\boldsymbol{W}_{h} \in \mathbb{R}^{d^{\prime} \times d}$ is a learnable linear transformation, which transforms the hidden states of student network into the same space as the teacher network's states.
+
+ $\boldsymbol{H}^{S} \in \mathbb{R}^{l \times d^{\prime}}$ and $\boldsymbol{H}^{T} \in \mathbb{R}^{l \times d}$ 分别表示学生网络和教师网络，就是为了的得到更小的student网络
+ 
+- 嵌入层的蒸馏
+
+与隐藏层蒸馏是类似
+
+Embedding-layer Distillation. We also perform embedding-layer distillation, which is similar to the hidden states based distillation and formulated as:
+\[
+\mathcal{L}_{\mathrm{embd}}=\operatorname{MSE}\left(\boldsymbol{E}^{S} \boldsymbol{W}_{e}, \boldsymbol{E}^{T}\right)
+\]
+where the matrices $\boldsymbol{E}^{S}$ and $\boldsymbol{H}^{T}$ refer to the embeddings of student and teacher networks, respectively. In this paper, they have the same shape as the hidden state matrices. The matrix $W_{e}$ is a linear transformation playing a similar role as $\boldsymbol{W}_{h}$
+
+- 蒸馏拟合teacher的预测结果
+
+除了模拟中间层的行为之外，研究者还利用知识蒸馏来拟合 teacher 模型的预测结果。具体而言，他们对 student 网络 logits 和 teacher 网络 logits 之间的 soft 交叉熵损失进行惩罚：
+
+其中 $z^S$ 和 $z^T $分别表示 student 和 teacher 模型预测的 logits 向量，log_softmax() 表示 log 似然，t 表示温度值。实验表明，t=1 时运行良好。
+
+$\mathcal{L}_{\text {layer }}\left(S_{m}, T_{g(m)}\right)=\left\{\begin{array}{ll}\mathcal{L}_{\text {embd }}\left(S_{0}, T_{0}\right), & m=0 \\ \mathcal{L}_{\text {hidn }}\left(S_{m}, T_{g(m)}\right)+\mathcal{L}_{\text {attn }}\left(S_{m}, T_{g(m)}\right), & M \geq m>0 \\ \mathcal{L}_{\text {pred }}\left(S_{M+1}, T_{N+1}\right), & m=M+1\end{array}\right.$
+
+
+### 两段式学习框架
+
+```{r}
+knitr::include_graphics('figs/tinybert2.png')
+```
+
+
+BERT的应用通常包含两个学习阶段：预训练和微调。BERT在预训练阶段学到的大量知识非常重要，并且迁移的时候也应该包含在内。因此，研究者提出了一个两段式学习框架，包含通用蒸馏和特定于任务的蒸馏。
+
+- 通用蒸馏
+
+在通用蒸馏中，研究者**使用原始BERT作为teacher模型，而且不对其进行微调，**利用大规模文本语料库作为学习数据。通过在通用领域文本上执行 Transformer 蒸馏，他们获取了一个通用 TinyBERT，**可以针对下游任务进行微调**。然而，由于隐藏/嵌入层大小及层数显著降低，通用 TinyBERT 的表现不如 BERT。
+
+因此模型降参数主要在这里
+
+- 针对特定任务的蒸馏
+
+研究者提出通过针对特定任务的蒸馏来获得有竞争力的微调 TinyBERT 模型。而在蒸馏过程中，他们在针对特定任务的增强数据集上（如图 2 所示）重新执行了提出的 Transformer 蒸馏。具体而言，微调的 BERT 用作 teacher 模型，并提出以数据增强方法来扩展针对特定任务的训练集。
+
+此外，上述两个学习阶段是相辅相成的：通用蒸馏为针对特定任务的蒸馏提供良好的初始化，而针对特定任务的蒸馏通过专注于学习针对特定任务的知识来进一步提升 TinyBERT 的效果。
+
+代码见：https://github.com/yinmingjun/TinyBERT
+
+## ALBERT
+
+**分解了词嵌入（Embedding）参数**
+
+从原理来看，词嵌入表示的是词含义与上下文无关，而隐藏层表示的是词之间的组合含义，句子越长它的信息量越丰富，后者更加复杂，也需要更多参数。如果词表V非常大（词多），需要V×E空间存储参数，如果保持词嵌入层大小E与隐藏词H的大小一致，当H变大时，VxE也跟着迅速变大。因此，论文作者将原来词嵌入层大小恒等于隐藏层大小：E≡H，改为：H>>E。这样就减少了参数，也可以支持未来使用更大的词表，比如对中文来说，词为单位比以字为单位效果更佳，但词量又比较大。 当前BERT、GPT-2模型的隐藏层大小动辄512、768维，而腾讯词向量200维就可以很好地描述800多万词条的词性。因此，论文作者将词过嵌入过程从原来的V->H分解成：先把词V映射到E（V->E），再由E映射到H（E->H），使其复杂度从O(V×H)降到了O(V×E+E×H)，当E比H小很多时其优势尤为明显。
+
+**Cross-layer Parameter Sharing**
+
+交叉层参数共享~
+
+>数量减少主要贡献
+
+- 只共享attention的相关参数
+- 只共享fnn相关参数
+- 共享所有参数
+
+```{r}
+knitr::include_graphics('figs/albertshare.png')
+```
+
+参数从89M降到了12M
+从最后一列的avg来看，只共享ATT的话不仅能降维还能保证性能不变 但是作者把FNN也共享了，这样一来更轻量了，但是掉了的参数哪里补，把bert-large换成bert-xxlarge。
+
+可以尝试只共享attention这样可以保持性能不变，也能起到压缩的效果
+
+
+
+代码见：https://github.com/brightmart/albert_zh
 
 
 ## Quantization量化策略

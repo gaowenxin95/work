@@ -24,7 +24,7 @@
 <meta name="author" content="高文欣" />
 
 
-<meta name="date" content="2020-06-24" />
+<meta name="date" content="2020-06-28" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -54,6 +54,70 @@
 <script src="libs/pagedtable-1.1/js/pagedtable.js"></script>
 
 
+<style type="text/css">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
 
 </head>
 
@@ -82,9 +146,14 @@
 <li class="chapter" data-level="1.6.1" data-path=""><a href="#模型效果"><i class="fa fa-check"></i><b>1.6.1</b> 模型效果</a></li>
 </ul></li>
 <li class="chapter" data-level="1.7" data-path=""><a href="#fastbert"><i class="fa fa-check"></i><b>1.7</b> fastbert</a></li>
-<li class="chapter" data-level="1.8" data-path=""><a href="#quantization量化策略"><i class="fa fa-check"></i><b>1.8</b> Quantization量化策略</a></li>
-<li class="chapter" data-level="1.9" data-path=""><a href="#pruning"><i class="fa fa-check"></i><b>1.9</b> Pruning</a></li>
-<li class="chapter" data-level="1.10" data-path=""><a href="#are-sixteen-heads-really-better-than-one"><i class="fa fa-check"></i><b>1.10</b> Are Sixteen Heads Really Better than One</a></li>
+<li class="chapter" data-level="1.8" data-path=""><a href="#tinybert"><i class="fa fa-check"></i><b>1.8</b> Tinybert</a><ul>
+<li class="chapter" data-level="1.8.1" data-path=""><a href="#transformer-蒸馏法"><i class="fa fa-check"></i><b>1.8.1</b> transformer 蒸馏法</a></li>
+<li class="chapter" data-level="1.8.2" data-path=""><a href="#两段式学习框架"><i class="fa fa-check"></i><b>1.8.2</b> 两段式学习框架</a></li>
+</ul></li>
+<li class="chapter" data-level="1.9" data-path=""><a href="#albert"><i class="fa fa-check"></i><b>1.9</b> ALBERT</a></li>
+<li class="chapter" data-level="1.10" data-path=""><a href="#quantization量化策略"><i class="fa fa-check"></i><b>1.10</b> Quantization量化策略</a></li>
+<li class="chapter" data-level="1.11" data-path=""><a href="#pruning"><i class="fa fa-check"></i><b>1.11</b> Pruning</a></li>
+<li class="chapter" data-level="1.12" data-path=""><a href="#are-sixteen-heads-really-better-than-one"><i class="fa fa-check"></i><b>1.12</b> Are Sixteen Heads Really Better than One</a></li>
 </ul></li>
 </ul>
 
@@ -106,7 +175,7 @@
 <div id="header">
 <h1 class="title">BERT学习笔记</h1>
 <p class="author"><em>高文欣</em></p>
-<p class="date"><em>2020-06-24</em></p>
+<p class="date"><em>2020-06-28</em></p>
 </div>
 <div id="bert学习笔记" class="section level1">
 <h1><span class="header-section-number">1</span> BERT学习笔记</h1>
@@ -158,6 +227,7 @@
 <p>这样的好处是，这个图像可能更像驴，而不会去像汽车或者狗之类的，而这样的soft信息存在于概率中，以及label之间的高低相似性都存在于soft target中。但是如果soft targe是像这样的信息[0.98 0.01 0.01]，就意义不大了，所以需要在softmax中增加温度参数T（这个设置在最终训练完之后的推理中是不需要的）<a href="https://blog.csdn.net/xbinworld/article/details/83063726">大饼博士X</a></p>
 </blockquote>
 <p><span class="math inline">\(q_{i}=\frac{\exp \left(z_{i} / T\right)}{\Sigma_{j} \exp \left(z_{j} / T\right)}\)</span></p>
+<p>其实可以理解为给label做label space增强，扩大label的可能性。</p>
 </div>
 </div>
 <div id="distilbert" class="section level2">
@@ -290,10 +360,102 @@ n-gram，在 1-5 中随机采样得到 n，然后采用 n-gram，去掉其他单
 都看看找找思路吧</li>
 </ul>
 <p><a href="https://www.jianshu.com/p/0b9970c4400a" class="uri">https://www.jianshu.com/p/0b9970c4400a</a></p>
-<p>查一下华为的Tinybert</p>
+</div>
+<div id="tinybert" class="section level2">
+<h2><span class="header-section-number">1.8</span> Tinybert</h2>
+<p>效果</p>
+<blockquote>
+<p>TinyBERT is empirically effective and achieves more than 96% the performance
+of teacher BERT BASE on GLUE benchmark, while being 7.5x smaller and 9.4x
+faster on inference. TinyBERT is also signiﬁcantly better than state-of-the-art
+baselines on BERT distillation, with only ∼28% parameters and ∼31% inference
+time of them.</p>
+</blockquote>
+<p>能达到原有bert的96%,速度提提升7.5~9.4倍</p>
+<div id="transformer-蒸馏法" class="section level3">
+<h3><span class="header-section-number">1.8.1</span> transformer 蒸馏法</h3>
+<p>几乎是对每一层都进行了蒸馏~</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>knitr<span class="op">::</span><span class="kw">include_graphics</span>(<span class="st">&#39;figs/tinybert.png&#39;</span>)</span></code></pre></div>
+<p><img src="figs/tinybert.png" width="838" /></p>
+<ul>
+<li>Transformer 层蒸馏</li>
+</ul>
+<blockquote>
+<p>Problem Formulation. Assuming that the student model has <span class="math inline">\(M\)</span> Transformer layers and teacher model has <span class="math inline">\(N\)</span> Transformer layers, we choose <span class="math inline">\(M\)</span> layers from the teacher model for the Transformerlayer distillation. The function <span class="math inline">\(n=g(m)\)</span> is used as a mapping function from student layers to teacher layers, which means that the <span class="math inline">\(m\)</span> -th layer of student model learns the information from the <span class="math inline">\(n\)</span> th layer of teacher model. The embedding-layer distillation and the prediction-layer distillation are
+also considered. We set 0 to be the index of embedding layer and <span class="math inline">\(M+1\)</span> to be the index of prediction layer, and the corresponding layer mappings are defined as <span class="math inline">\(0=g(0)\)</span> and <span class="math inline">\(N+1=g(M+1)\)</span> respectively. The effect of the choice of different mapping functions on the performances will be studied in the experiment section. Formally, the student can acquire knowledge from the teacher by minimizing the following objective:</p>
+</blockquote>
+<p>假定 student 模型有 M 个 Transformer 层，teacher 模型有 N 个 Transformer 层，从 teacher 模型中选择 M 个 Transformer 层用于 Transformer 层蒸馏。n=g(m) 是 student 层到 teacher 层的映射函数，这意味着 student 模型的第 m 层从 teacher 模型的第 n 层开始学习信息。嵌入层蒸馏和预测层蒸馏也考虑进来，将嵌入层的指数设为 0，预测层的指数设为 M+1，并且对应的层映射分别定义为 0 = g(0) 和 N + 1 = g(M + 1)。</p>
+<p><span class="math inline">\(\mathcal{L}_{\mathrm{model}}=\sum_{m=0}^{M+1} \lambda_{m} \mathcal{L}_{\mathrm{layer}}\left(S_{m}, T_{g(m)}\right)\)</span></p>
+<p>其中 L_layer 是给定模型层（如 Transformer 层或嵌入层）的损失函数，λ_m 是表征第 m 层蒸馏重要度的超参数。</p>
+<ul>
+<li>基于注意力层的蒸馏</li>
+</ul>
+<p><span class="math inline">\(\mathcal{L}_{\mathrm{atn}}=\frac{1}{h} \sum_{i=1}^{h} \operatorname{MSE}\left(\boldsymbol{A}_{i}^{S}, \boldsymbol{A}_{i}^{T}\right)\)</span></p>
+<ul>
+<li>对Transformer隐藏层进行蒸馏</li>
+</ul>
+<p><span class="math inline">\(\mathcal{L}_{\mathrm{hidn}}=\operatorname{MSE}\left(\boldsymbol{H}^{S} \boldsymbol{W}_{h}, \boldsymbol{H}^{T}\right)\)</span></p>
+<blockquote>
+<p>where the matrices <span class="math inline">\(\boldsymbol{H}^{S} \in \mathbb{R}^{l \times d^{\prime}}\)</span> and <span class="math inline">\(\boldsymbol{H}^{T} \in \mathbb{R}^{l \times d}\)</span> refer to the hidden states of student and teacher networks respectively, which are calculated by Equation 4 The scalar values <span class="math inline">\(d\)</span> and <span class="math inline">\(d^{\prime}\)</span> denote the hidden sizes of teacher and student models, and <span class="math inline">\(d^{\prime}\)</span> is often smaller than <span class="math inline">\(d\)</span> to obtain a smaller student network. The matrix <span class="math inline">\(\boldsymbol{W}_{h} \in \mathbb{R}^{d^{\prime} \times d}\)</span> is a learnable linear transformation, which transforms the hidden states of student network into the same space as the teacher network’s states.</p>
+</blockquote>
+<p><span class="math inline">\(\boldsymbol{H}^{S} \in \mathbb{R}^{l \times d^{\prime}}\)</span> and <span class="math inline">\(\boldsymbol{H}^{T} \in \mathbb{R}^{l \times d}\)</span> 分别表示学生网络和教师网络，就是为了的得到更小的student网络</p>
+<ul>
+<li>嵌入层的蒸馏</li>
+</ul>
+<p>与隐藏层蒸馏是类似</p>
+<p>Embedding-layer Distillation. We also perform embedding-layer distillation, which is similar to the hidden states based distillation and formulated as:
+<span class="math display">\[
+\mathcal{L}_{\mathrm{embd}}=\operatorname{MSE}\left(\boldsymbol{E}^{S} \boldsymbol{W}_{e}, \boldsymbol{E}^{T}\right)
+\]</span>
+where the matrices <span class="math inline">\(\boldsymbol{E}^{S}\)</span> and <span class="math inline">\(\boldsymbol{H}^{T}\)</span> refer to the embeddings of student and teacher networks, respectively. In this paper, they have the same shape as the hidden state matrices. The matrix <span class="math inline">\(W_{e}\)</span> is a linear transformation playing a similar role as <span class="math inline">\(\boldsymbol{W}_{h}\)</span></p>
+<ul>
+<li>蒸馏拟合teacher的预测结果</li>
+</ul>
+<p>除了模拟中间层的行为之外，研究者还利用知识蒸馏来拟合 teacher 模型的预测结果。具体而言，他们对 student 网络 logits 和 teacher 网络 logits 之间的 soft 交叉熵损失进行惩罚：</p>
+<p>其中 <span class="math inline">\(z^S\)</span> 和 $z^T $分别表示 student 和 teacher 模型预测的 logits 向量，log_softmax() 表示 log 似然，t 表示温度值。实验表明，t=1 时运行良好。</p>
+<p><span class="math inline">\(\mathcal{L}_{\text {layer }}\left(S_{m}, T_{g(m)}\right)=\left\{\begin{array}{ll}\mathcal{L}_{\text {embd }}\left(S_{0}, T_{0}\right), &amp; m=0 \\ \mathcal{L}_{\text {hidn }}\left(S_{m}, T_{g(m)}\right)+\mathcal{L}_{\text {attn }}\left(S_{m}, T_{g(m)}\right), &amp; M \geq m&gt;0 \\ \mathcal{L}_{\text {pred }}\left(S_{M+1}, T_{N+1}\right), &amp; m=M+1\end{array}\right.\)</span></p>
+</div>
+<div id="两段式学习框架" class="section level3">
+<h3><span class="header-section-number">1.8.2</span> 两段式学习框架</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>knitr<span class="op">::</span><span class="kw">include_graphics</span>(<span class="st">&#39;figs/tinybert2.png&#39;</span>)</span></code></pre></div>
+<p><img src="figs/tinybert2.png" width="682" /></p>
+<p>BERT的应用通常包含两个学习阶段：预训练和微调。BERT在预训练阶段学到的大量知识非常重要，并且迁移的时候也应该包含在内。因此，研究者提出了一个两段式学习框架，包含通用蒸馏和特定于任务的蒸馏。</p>
+<ul>
+<li>通用蒸馏</li>
+</ul>
+<p>在通用蒸馏中，研究者<strong>使用原始BERT作为teacher模型，而且不对其进行微调，</strong>利用大规模文本语料库作为学习数据。通过在通用领域文本上执行 Transformer 蒸馏，他们获取了一个通用 TinyBERT，<strong>可以针对下游任务进行微调</strong>。然而，由于隐藏/嵌入层大小及层数显著降低，通用 TinyBERT 的表现不如 BERT。</p>
+<p>因此模型降参数主要在这里</p>
+<ul>
+<li>针对特定任务的蒸馏</li>
+</ul>
+<p>研究者提出通过针对特定任务的蒸馏来获得有竞争力的微调 TinyBERT 模型。而在蒸馏过程中，他们在针对特定任务的增强数据集上（如图 2 所示）重新执行了提出的 Transformer 蒸馏。具体而言，微调的 BERT 用作 teacher 模型，并提出以数据增强方法来扩展针对特定任务的训练集。</p>
+<p>此外，上述两个学习阶段是相辅相成的：通用蒸馏为针对特定任务的蒸馏提供良好的初始化，而针对特定任务的蒸馏通过专注于学习针对特定任务的知识来进一步提升 TinyBERT 的效果。</p>
+<p>代码见：<a href="https://github.com/yinmingjun/TinyBERT" class="uri">https://github.com/yinmingjun/TinyBERT</a></p>
+</div>
+</div>
+<div id="albert" class="section level2">
+<h2><span class="header-section-number">1.9</span> ALBERT</h2>
+<p><strong>分解了词嵌入（Embedding）参数</strong></p>
+<p>从原理来看，词嵌入表示的是词含义与上下文无关，而隐藏层表示的是词之间的组合含义，句子越长它的信息量越丰富，后者更加复杂，也需要更多参数。如果词表V非常大（词多），需要V×E空间存储参数，如果保持词嵌入层大小E与隐藏词H的大小一致，当H变大时，VxE也跟着迅速变大。因此，论文作者将原来词嵌入层大小恒等于隐藏层大小：E≡H，改为：H&gt;&gt;E。这样就减少了参数，也可以支持未来使用更大的词表，比如对中文来说，词为单位比以字为单位效果更佳，但词量又比较大。 当前BERT、GPT-2模型的隐藏层大小动辄512、768维，而腾讯词向量200维就可以很好地描述800多万词条的词性。因此，论文作者将词过嵌入过程从原来的V-&gt;H分解成：先把词V映射到E（V-&gt;E），再由E映射到H（E-&gt;H），使其复杂度从O(V×H)降到了O(V×E+E×H)，当E比H小很多时其优势尤为明显。</p>
+<p><strong>Cross-layer Parameter Sharing</strong></p>
+<p>交叉层参数共享~</p>
+<blockquote>
+<p>数量减少主要贡献</p>
+</blockquote>
+<ul>
+<li>只共享attention的相关参数</li>
+<li>只共享fnn相关参数</li>
+<li>共享所有参数</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>knitr<span class="op">::</span><span class="kw">include_graphics</span>(<span class="st">&#39;figs/albertshare.png&#39;</span>)</span></code></pre></div>
+<p><img src="figs/albertshare.png" width="642" /></p>
+<p>参数从89M降到了12M
+从最后一列的avg来看，只共享ATT的话不仅能降维还能保证性能不变 但是作者把FNN也共享了，这样一来更轻量了，但是掉了的参数哪里补，把bert-large换成bert-xxlarge。</p>
+<p>可以尝试只共享attention这样可以保持性能不变，也能起到压缩的效果</p>
+<p>代码见：<a href="https://github.com/brightmart/albert_zh" class="uri">https://github.com/brightmart/albert_zh</a></p>
 </div>
 <div id="quantization量化策略" class="section level2">
-<h2><span class="header-section-number">1.8</span> Quantization量化策略</h2>
+<h2><span class="header-section-number">1.10</span> Quantization量化策略</h2>
 <p>Quantization（量化）：将高精度模型用低精度来表示，使得模型更小；</p>
 <p>何谓量化，打个比方，看 1080p 太慢，于是降到 720p 看。</p>
 <p>同样的，如果用完整 32 位训练和保存的模型看作 1080p 的话，那么量化完后模型就可以当作是 720p，如此一来，模型自然变小，速度自然加快。</p>
@@ -317,7 +479,7 @@ n-gram，在 1-5 中随机采样得到 n，然后采用 n-gram，去掉其他单
 <p>训练结束后，量化权重用量化后的模型直接进行预测。此过程其实有点类似混合精度训练里面的一些操作了。</p>
 </div>
 <div id="pruning" class="section level2">
-<h2><span class="header-section-number">1.9</span> Pruning</h2>
+<h2><span class="header-section-number">1.11</span> Pruning</h2>
 <p>Pruning（剪枝）：将模型中作用较小部分舍弃，而让模型更小。</p>
 <p>何谓剪枝，取其精华，去其糟粕，但和蒸馏不同的是，蒸馏是将精华装入一个新模型，而剪枝则只是对原模型进行修剪，保留原模型。</p>
 <p>关于剪枝，具体做法简单说就是将模型中权重设为0，而根据所操作规模，可分为三个级别：</p>
@@ -335,7 +497,7 @@ n-gram，在 1-5 中随机采样得到 n，然后采用 n-gram，去掉其他单
 具体的做法和上面两个也差不多，只是一个更大范围操作。最初看到对 Bert 或者 Transformer 进行该操作是在 Are Sixteen Heads Really Better than One? 中看到的，因为一些研究质疑 Transformer 中注意力头的冗余性，于是也是根据一个打分标准（proxy importance score，模型对该参数的敏感程度）依次去掉不重要的头，最后发现有些层甚至可以从 16 个头减到只剩一个头而不太影响效果。</p>
 </div>
 <div id="are-sixteen-heads-really-better-than-one" class="section level2">
-<h2><span class="header-section-number">1.10</span> Are Sixteen Heads Really Better than One</h2>
+<h2><span class="header-section-number">1.12</span> Are Sixteen Heads Really Better than One</h2>
 </div>
 </div>
             </section>
