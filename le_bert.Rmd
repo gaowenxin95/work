@@ -68,6 +68,8 @@ $q_{i}=\frac{\exp \left(z_{i} / T\right)}{\Sigma_{j} \exp \left(z_{j} / T\right)
 
 其实可以理解为给label做label space增强，扩大label的可能性。
 
+- 只用于分类的问题
+
 
 
 ## DistilBERT
@@ -403,6 +405,12 @@ $Q(x, \text { scale, zero_point })=\operatorname{round}\left(\frac{x}{\text { sc
 
 训练结束后，量化权重用量化后的模型直接进行预测。此过程其实有点类似混合精度训练里面的一些操作了。
 
+pytorch和tensorflow都有对应的接口~
+
+pytorch：https://pytorch.org/docs/master/quantization.html
+
+tensorflow：https://www.tensorflow.org/lite/performance/post_training_quantization
+
 
 ## Pruning
 
@@ -435,7 +443,36 @@ Pruning（剪枝）：将模型中作用较小部分舍弃，而让模型更小�
 权重矩阵剪枝
 具体的做法和上面两个也差不多，只是一个更大范围操作。最初看到对 Bert 或者 Transformer 进行该操作是在 Are Sixteen Heads Really Better than One? 中看到的，因为一些研究质疑 Transformer 中注意力头的冗余性，于是也是根据一个打分标准（proxy importance score，模型对该参数的敏感程度）依次去掉不重要的头，最后发现有些层甚至可以从 16 个头减到只剩一个头而不太影响效果。
 
+
+
+tensorflow相关教程：https://www.tensorflow.org/model_optimization/guide/pruning
+
 ## Are Sixteen Heads Really Better than One
+
+>multi head中并不是所有的head都需要，有很多head提取的信息对最终的结果并没有什么影响，是冗余存在的
+
+对多头的head进行了修改：
+$\operatorname{MHAtt}(\mathbf{x}, q)=\sum_{h=1}^{N_{h}} \xi_{h} \operatorname{Att}_{W_{k}^{h}, W_{q}^{h}, W_{v}^{h}, W_{o}^{h}}(\mathbf{x}, q)$
+
+　在这里引入了一个系数ζh，该值的取值为0或1，它的作用是用来mask不重要的head。在训练时保持为1，到test的时候对部分head mask掉。
+
+
+去掉head时候会对性能造成影响？
+
+作者从三方面进行了实验
+
+1，每次去掉一层中一个head，测试模型的性能
+
+2，每次去掉一层中剩余的层，只保存一个head，测试模型的性能
+
+3，通过梯度来判断每个head的重要性，然后去掉一部分不重要的head，测试模型的性能。
+
+通过三组对比实验
+
+去掉了大量的head，不影响模型效果，但是速度似乎并没有讲清楚有咩有提升~
+
+GitHub：https://github.com/pmichel31415/are-16-heads-really-better-than-1
+
 
 
 

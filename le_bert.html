@@ -228,6 +228,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </blockquote>
 <p><span class="math inline">\(q_{i}=\frac{\exp \left(z_{i} / T\right)}{\Sigma_{j} \exp \left(z_{j} / T\right)}\)</span></p>
 <p>其实可以理解为给label做label space增强，扩大label的可能性。</p>
+<ul>
+<li>只用于分类的问题</li>
+</ul>
 </div>
 </div>
 <div id="distilbert" class="section level2">
@@ -477,6 +480,9 @@ where the matrices <span class="math inline">\(\boldsymbol{E}^{S}\)</span> and <
 <li><p>然后更新未量化权重</p></li>
 </ul>
 <p>训练结束后，量化权重用量化后的模型直接进行预测。此过程其实有点类似混合精度训练里面的一些操作了。</p>
+<p>pytorch和tensorflow都有对应的接口~</p>
+<p>pytorch：<a href="https://pytorch.org/docs/master/quantization.html" class="uri">https://pytorch.org/docs/master/quantization.html</a></p>
+<p>tensorflow：<a href="https://www.tensorflow.org/lite/performance/post_training_quantization" class="uri">https://www.tensorflow.org/lite/performance/post_training_quantization</a></p>
 </div>
 <div id="pruning" class="section level2">
 <h2><span class="header-section-number">1.11</span> Pruning</h2>
@@ -495,9 +501,24 @@ where the matrices <span class="math inline">\(\boldsymbol{E}^{S}\)</span> and <
 <p>于是也就带来了和前一种方法不同的一点，因为直接去掉一行一列后的话，可以在直接降低权重使用空间的情况下，仍然直接矩阵运算，而不用像上面一样使用稀疏矩阵。但同样，因为形状的改变，也会在一定程度上影响并行运算的效率。</p>
 <p>权重矩阵剪枝
 具体的做法和上面两个也差不多，只是一个更大范围操作。最初看到对 Bert 或者 Transformer 进行该操作是在 Are Sixteen Heads Really Better than One? 中看到的，因为一些研究质疑 Transformer 中注意力头的冗余性，于是也是根据一个打分标准（proxy importance score，模型对该参数的敏感程度）依次去掉不重要的头，最后发现有些层甚至可以从 16 个头减到只剩一个头而不太影响效果。</p>
+<p>tensorflow相关教程：<a href="https://www.tensorflow.org/model_optimization/guide/pruning" class="uri">https://www.tensorflow.org/model_optimization/guide/pruning</a></p>
 </div>
 <div id="are-sixteen-heads-really-better-than-one" class="section level2">
 <h2><span class="header-section-number">1.12</span> Are Sixteen Heads Really Better than One</h2>
+<blockquote>
+<p>multi head中并不是所有的head都需要，有很多head提取的信息对最终的结果并没有什么影响，是冗余存在的</p>
+</blockquote>
+<p>对多头的head进行了修改：
+<span class="math inline">\(\operatorname{MHAtt}(\mathbf{x}, q)=\sum_{h=1}^{N_{h}} \xi_{h} \operatorname{Att}_{W_{k}^{h}, W_{q}^{h}, W_{v}^{h}, W_{o}^{h}}(\mathbf{x}, q)\)</span></p>
+<p>　在这里引入了一个系数ζh，该值的取值为0或1，它的作用是用来mask不重要的head。在训练时保持为1，到test的时候对部分head mask掉。</p>
+<p>去掉head时候会对性能造成影响？</p>
+<p>作者从三方面进行了实验</p>
+<p>1，每次去掉一层中一个head，测试模型的性能</p>
+<p>2，每次去掉一层中剩余的层，只保存一个head，测试模型的性能</p>
+<p>3，通过梯度来判断每个head的重要性，然后去掉一部分不重要的head，测试模型的性能。</p>
+<p>通过三组对比实验</p>
+<p>去掉了大量的head，不影响模型效果，但是速度似乎并没有讲清楚有咩有提升~</p>
+<p>GitHub：<a href="https://github.com/pmichel31415/are-16-heads-really-better-than-1" class="uri">https://github.com/pmichel31415/are-16-heads-really-better-than-1</a></p>
 </div>
 </div>
             </section>
