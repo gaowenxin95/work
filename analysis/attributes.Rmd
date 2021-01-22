@@ -2,7 +2,7 @@
 title: "属性抽取"
 author: "wenxin Gao"
 date: "2020/7/7"
-output: html_document
+output:  word_document
 ---
 
 # 属性抽取
@@ -34,15 +34,14 @@ output: html_document
 
 >只能预测可枚举的高频属性，导致很多属性值不可做
 预测出来的属性值没有可解释性，在实际业务中，预测出来结果也不一定敢用（比如模型预测出来这个肉夹馍用的是牛肉，但是你也不一定敢信，又看不出来，万一是假的）
-当然也可以融各自所长，做一个既能抽取又能生成的模型：比如基于 CopyNet 或者 Pointer-Generator，针对不同的输入情况，可以自由在“抽取模式”和“生成模式”之间进行切换。感觉听上去还比较高级吧，相关文章没看到过，谁感兴趣可以试一下，一条光明的小道指给你们了哈，快去发论文吧，不用谢不用谢
 
-再举一个医疗文本的例子
+
 
 
 
 ## 属性抽取的难点
 
->属性抽取较之关系抽取的难点在于，除了要识别实体的属性名还要识别实体的属性值，而属性值结构也是不确定的，因此大多研究都是基于规则进行抽取，面向的也是网页，query，表格数据[9,10,11]。但是这种方法在医疗领域数据上有一定的弊端，因为医疗知识图谱不同于常识性知识图谱，它对于信息的质量有着很高的要求，对信息噪音的容错性也较低。
+>属性抽取较之关系抽取的难点在于，除了要识别实体的属性名还要识别实体的属性值，而属性值结构也是不确定的，因此大多研究都是基于规则进行抽取，面向的也是网页，query，表格数据。但是这种方法在医疗领域数据上有一定的弊端，因为医疗知识图谱不同于常识性知识图谱，它对于信息的质量有着很高的要求，对信息噪音的容错性也较低。
 
 ## 应用场景
 
@@ -52,8 +51,12 @@ output: html_document
 
 人物属性抽取：还有一个专门的数据集合集：https://github.com/MAJIN123/Distant-Supervision-for-Person-Attribute-Extraction
 
+
+
 找到一个事件抽取和事件要素抽取的baseline
 https://zhuanlan.zhihu.com/p/133783503
+
+数据见：https://www.datafountain.cn/competitions/361/datasets
 
 github传送门见：https://github.com/gaozhanfire/CCF-BDCI2019_Entity_Discovery
 
@@ -75,39 +78,101 @@ github传送门见：https://github.com/gaozhanfire/CCF-BDCI2019_Entity_Discover
 
 ## Scaling Up Open Tagging from Tens to Thousands Comprehension Empowered Attribute Value Extraction from Product Title
 
-- 问题定义为从title文本中提取attribute中各属性对应的属性值
+将属性收取转化为了序列标注的问题
 
-- 对title和attribute分别进行encoding，encoder的基本组成均为BERT+Bi-lstm
+输入数据：title，attribute 文本数据
 
 - 将attribute集合中的各个属性对应的编码与title的编码进行attention计算，之后经过CRF层输出标签，
-注意，这里输出的标签只有三种：{B,I,O}，对每一个属性进行以上操作后，根据输出结果的标签，即可提取出对应的属性值，属性值没有数量限制，可能输出多个值，也可能没有对应值（即所有标签均为O）。
 
+输出数据：attribute 的BIO tag
+
+- 这里输出的标签只有三种：{B,I,O}，对每一个属性进行以上操作后，根据输出结果的标签，即可提取出对应的属性值，属性值没有数量限制，可能输出多个值，也可能没有对应值（即所有标签均为O）。
+
+是pytorch写的，
 
 github传送门见：https://github.com/hackerxiaobai/OpenTag_2019
 
-
-参考文献
-
-### Unsupervised extraction of popular product attributes from web sites
-
-无监督
-
-从用户评价中和产品描述页面中提取流行产品的属性
-数据集是来自在线零往网站的爬虫
-
-
-
-todo list
-
-- [ ] Text mining for product attribute extraction. 无监督
-
-- [ ] Attribute extraction from product titles in ecommerce.
-
-- [ ] Bootstrapped named entity recognition for product attribute extraction
-
-
-- [ ] Unsupervised extraction of attributes and their values from product description
+这个里面包含数据，预处理过程，模型，可以直接运行main函数
 
 
 
 
+
+## OpenTag: Open Att ribute Value Extraction from Product Profiles
+
+>In this work, we leverage product profile information such as titles and descriptions to discover missing values of product attributes.
+
+这篇文章是从product中产品名和描述中提取属性的
+
+主要贡献如下
+
+>(1) we formalize the problem as a sequence tagging task, and propose a joint model exploiting recurrent neural networks (specifi cally, bidirectional LSTM) to capture context and semantics, and Conditional Random Fields (CRF) to enforce tagging consistency; 
+
+将属性抽取问题转化为序列标注问题，提出一个联合抽取模型：LSTM+CRF+attention
+
+>(2) we develop a novel attention mechanism to provide interpretable explanation for our model’s decisions; 
+
+加入attention机制
+
+>(3) we propose a novel sampling strategy exploring active learning to reduce the burden of human annotation.OpenTag does not use any dictionary or hand-crafted features as in prior works.Extensive experiments in real-life datasets in different domains show that OpenTag with our active learning strategy discovers new attribute values from as few as 150 annotated samples
+(reduction in 3 . 3x amount of annotation eff ort) with a high F-score of 83%, outperforming state-of-the-art models.
+
+
+>OpenTag does not use any dictionary or hand-crafted feature
+
+opentag可以自动采样进行标注，无需人工。f1 score达到83%
+
+当前存在的**problem**
+
+>Given a set of product profiles presented as unstructured text data (containing information like titles, descriptions, and bullets), and a set of pre-defined target attributes (e.g., brand , fl avor , size ), our objective is to extract corresponding attribute values from unstructured text.
+
+如何从结构化文本中提取属性值
+
+>We have an OWA assumption where we want to discover new attribute values that may not have been encountered before. Note that we assume the target attributes (and not attribute-values) for each domain are given as input to the system.
+
+当要提取的属性值在之前的数据中未曾出现过，如何处理,即能否通过有限的标注数据建模
+
+这个是半监督嘛？
+
+>OpenTag automatically figures out the set of applicable attribute-values for each product in the domain. 
+
+openTag可以主动学习提取属性值
+ 
+
+### Sequence Tagging Approach
+
+>. In order to model the above dependencies between attributes and values, we adopt the sequence tagging approach. **In particular, we associate a tag from a given tagset to each token in the input sequence. The objective is to jointly predict all the tags in the input sequence. In case of named entity recognition (NER), the objective is to tag entities like (names of) persons,
+locations, and organizations in the given input sequence. **Our problem is a specifi c case of NER where we want to tag attribute values given an input sequence of tokens. The idea is to exploit distributional semantics , where similar sequences of tags for tokens identify similar concepts.
+
+
+
+将属性抽取转化为类似于实体识别的序列标注的方式进行抽取
+
+一个属性可能对应多个不同的属性值
+
+本文采取的标注策略是BIOE
+
+>‘E’ represents the end of an attribute.
+
+B是属性的开始，E代表属性值的结束
+
+
+### 模型结构
+
+
+![](../Attributes/bisltm_crf.png)
+### ACTIVE LEARNING
+
+主动学习机制
+![](../Attributes/active_learn.png)
+
+主动学习的主要思路
+
+是根据少量的有标签样本训练初始模型，对未知样本进行预测，
+然后设定询问策略，将符合标准的样本进行标注，加入有标签训练集，如此循环，直到达到设定的停止标准。
+本文主动学习关键点在于**询问策略制定**，采用了标签翻转（tag flips）作为评判指标，
+通俗讲就是，选择一组序列中，在多个epoch内，模型预测标签变化次数最多的序列，进行人工标注。
+
+
+
+## 参考文献
